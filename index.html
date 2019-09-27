@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>留言板</title>
+    <style>
+        ul {
+            list-style: none;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #warpper {
+            width: 900px;
+            margin: 0 auto;
+        }
+
+        #warpper>form {
+            text-align: center;
+        }
+
+        #warpper>ul {
+            text-align: start;
+            border: 1px solid #ddd;
+        }
+
+        ul>li {
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>留言板</h1>
+    <div id="warpper">
+        <form id="postMessage">
+            <label for="">姓名</label>
+            <input type="text" name="name" id="leaveMessage">
+            <label for="">留言</label>
+            <input type="text" name="content" id="leaveMessage">
+            <input type="submit" value="提交">
+        </form>
+        <ul></ul>
+    </div>
+</body>
+<script src="//cdn.jsdelivr.net/npm/leancloud-storage@3.15.0/dist/av-min.js"></script>
+<script>
+    var APP_ID = '7MF7uYEPDOza2u3quLRAl0Q8-gzGzoHsz';
+    var APP_KEY = 'yrdu3opXzDEuQjmSpLJ0FRM2';
+
+    AV.init({
+        appId: APP_ID,
+        appKey: APP_KEY
+    });
+    let query = new AV.Query('Message');
+    query.find().then(function (message) {
+        let arr = message.map(e => e.attributes)
+        arr.forEach(item => {
+            let li = document.createElement('li')
+            let ul = document.querySelector('ul')
+            li.innerText = `${item.name}: ${item.content}`
+            ul.appendChild(li)
+        })
+
+    })
+    let postMessage = document.querySelector('#postMessage')
+    postMessage.addEventListener('submit', function (e) {
+        let content = postMessage.querySelector('input[name=content]').value
+        let name = postMessage.querySelector('input[name=name]').value
+        e.preventDefault()
+        var Message = AV.Object.extend('Message');
+        var message = new Message();
+        message.set('content', content)
+        message.set('name', name)
+        message.save().then(function (e) {
+            let li = document.createElement('li')
+            let ul = document.querySelector('ul')
+            li.innerText = `${e.attributes.name}: ${e.attributes.content}`
+            ul.appendChild(li)
+            content = ''
+            name = ''
+        })
+    })
+</script>
+
+</html>
